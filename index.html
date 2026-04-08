@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PT Kedap Saayaq Dua - Sistem Operasional</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="loginScreen" class="login-screen">
+    <div class="login-shell">
+      <div class="login-brand">
+        <div class="brand-icon large">🌴</div>
+        <div>
+          <h1>PT Kedap Saayaq Dua</h1>
+          <p>Sistem Operasional</p>
+        </div>
+      </div>
+      <div class="login-card">
+        <h2>Masuk ke Sistem</h2>
+        <div class="role-picker">
+          <button type="button" class="role-pick active" data-role="staff">Staff</button>
+          <button type="button" class="role-pick" data-role="grading">Grading</button>
+        </div>
+        <form id="loginForm" class="login-form">
+          <label>
+            <span>Email akun</span>
+            <input id="loginEmail" class="input" type="email" />
+          </label>
+          <label>
+            <span>Password</span>
+            <input id="loginPassword" class="input" type="password" placeholder="Masukkan password" required />
+          </label>
+          <button class="btn primary wide" type="submit">Login</button>
+          <div id="loginInfo" class="alert info small">Staff: staff@dura.local · Grading: grading@dura.local</div>
+          <div id="loginError" class="alert error hidden"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="app" class="app hidden">
+    <div id="mobileOverlay" class="mobile-overlay"></div>
+    <aside id="sidebar" class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">🌴</div>
+        <div>
+          <h1>PT Kedap Saayaq Dua</h1>
+          <p>Sistem Operasional</p>
+        </div>
+      </div>
+
+      <div class="role-card">
+        <span>Login sebagai</span>
+        <strong id="roleLabel">STAFF</strong>
+        <small id="userEmail" class="role-email">staff@dura.local</small>
+        <button id="logoutBtn" class="ghost-btn">Logout</button>
+      </div>
+
+      <nav class="menu">
+        <button class="menu-item active" data-page="dashboard">Dashboard</button>
+        <button class="menu-item" data-page="grading">Input Grading</button>
+        <button class="menu-item" data-page="td">Input Tenera Dura</button>
+        <button class="menu-item" data-page="rekapGrading">Rekap Grading</button>
+        <button class="menu-item" data-page="rekapTD">Rekap Tenera Dura</button>
+        <button class="menu-item staff-only" data-page="sheetGrading">Spreadsheet Grading</button>
+        <button class="menu-item staff-only" data-page="sheetTD">Spreadsheet Tenera Dura</button>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button id="menuToggle" class="menu-toggle" type="button">☰</button>
+          <div>
+            <h2 id="pageTitle">Dashboard</h2>
+            <p id="pageSubtitle">Ringkasan operasional grading dan Tenera Dura.</p>
+          </div>
+        </div>
+        <div class="top-actions">
+          <input id="globalSearch" class="input search" placeholder="Cari sopir, plat, supplier..." />
+        </div>
+      </header>
+
+      <section id="appStatus" class="alert info hidden"></section>
+      <section id="summaryCards" class="summary-grid"></section>
+
+      <section id="page-dashboard" class="page active">
+        <div class="grid cols-2">
+          <div class="card">
+            <div class="card-head"><div><h3>Ringkasan Grading</h3><p>Realtime dari Firebase.</p></div></div>
+            <div id="dashGrading" class="metric-grid"></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><div><h3>Ringkasan TD</h3><p>Realtime dari Firebase.</p></div></div>
+            <div id="dashTD" class="metric-grid"></div>
+          </div>
+        </div>
+        <div class="grid cols-2">
+          <div class="card">
+            <div class="card-head"><div><h3>Per Supplier</h3><p>Berdasarkan transaksi grading.</p></div></div>
+            <div id="dashSuppliers" class="stack"></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><div><h3>Per Sopir</h3><p>Ringkasan grading.</p></div></div>
+            <div id="dashDrivers" class="stack"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="page-grading" class="page">
+        <div class="grid form-layout">
+          <div class="card sticky-card">
+            <div class="card-head"><div><h3>Input Grading</h3><p>Pilih supplier tetap atau ketik manual.</p></div></div>
+            <form id="gradingForm" class="form-grid">
+              <input type="hidden" name="editId" />
+              <label class="span-2"><span>Nama Sopir</span><input id="gradingDriver" class="input" name="driver" list="driverList" required /><datalist id="driverList"></datalist></label>
+              <label><span>Plat Kendaraan</span><input id="gradingPlate" class="input" name="plate" required /></label>
+              <label><span>Supplier dari List</span><select id="gradingSupplier" class="input" name="supplierSelect"></select></label>
+              <label class="span-2"><span>Supplier Manual</span><input id="gradingSupplierManual" class="input" name="supplierManual" placeholder="Isi jika tidak ada di list" /></label>
+              <label class="span-2"><span>Total Janjang</span><input class="input" name="totalBunches" type="number" min="0" value="0" required /></label>
+              <label><span>Mentah</span><input class="input cat" name="mentah" type="number" min="0" value="0" /></label>
+              <label><span>Mengkal</span><input class="input cat" name="mengkal" type="number" min="0" value="0" /></label>
+              <label><span>Overripe</span><input class="input cat" name="overripe" type="number" min="0" value="0" /></label>
+              <label><span>Busuk</span><input class="input cat" name="busuk" type="number" min="0" value="0" /></label>
+              <label><span>Tandan Kosong</span><input class="input cat" name="kosong" type="number" min="0" value="0" /></label>
+              <label><span>Parthenocarpi</span><input class="input cat" name="partheno" type="number" min="0" value="0" /></label>
+              <label class="span-2"><span>Makan Tikus</span><input class="input cat" name="tikus" type="number" min="0" value="0" /></label>
+              <div class="form-actions span-2">
+                <button type="button" id="cancelEditGradingBtn" class="btn secondary hidden">Batal Edit</button>
+                <button type="button" id="resetGradingBtn" class="btn secondary">Reset</button>
+                <button type="submit" class="btn primary">Simpan Grading</button>
+              </div>
+            </form>
+          </div>
+          <div class="stack">
+            <div class="card hot-card">
+              <div class="card-head"><div><h3>Total Potongan</h3><p>Live calculation.</p></div></div>
+              <div id="gradingTotalDeduction" class="big-number">3.00%</div>
+              <div id="gradingStatus" class="status ok">BAIK</div>
+            </div>
+            <div class="card">
+              <div class="card-head"><div><h3>Persentase & Potongan</h3><p>Semua kategori tampil lengkap.</p></div></div>
+              <div class="table-wrap"><table><thead><tr><th>Kategori</th><th>Jumlah</th><th>Persen</th><th>Potongan</th></tr></thead><tbody id="gradingBreakdown"></tbody></table></div>
+              <div id="gradingValidation" class="alert info">Isi form untuk mulai menghitung.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="page-td" class="page">
+        <div class="grid form-layout">
+          <div class="card sticky-card">
+            <div class="card-head"><div><h3>Input Tenera Dura</h3><p>Data realtime dan bisa diedit kembali.</p></div></div>
+            <form id="tdForm" class="form-grid">
+              <input type="hidden" name="editId" />
+              <label class="span-2"><span>Nama Sopir</span><input class="input" name="driver" list="tdDriverList" required /><datalist id="tdDriverList"></datalist></label>
+              <label><span>Plat</span><input class="input" name="plate" required /></label>
+              <label><span>Tenera</span><input class="input" name="tenera" type="number" min="0" value="0" required /></label>
+              <label><span>Dura</span><input class="input" name="dura" type="number" min="0" value="0" required /></label>
+              <div class="form-actions span-2">
+                <button type="button" id="cancelEditTDBtn" class="btn secondary hidden">Batal Edit</button>
+                <button type="button" id="resetTDBtn" class="btn secondary">Reset</button>
+                <button type="submit" class="btn primary">Simpan Tenera Dura</button>
+              </div>
+            </form>
+          </div>
+          <div class="card">
+            <div class="card-head"><div><h3>Komposisi TD</h3><p>Tampilan besar dan mudah dibaca.</p></div></div>
+            <div class="metric-grid">
+              <div class="metric"><span>Total TD</span><strong id="tdTotal">0</strong></div>
+              <div class="metric"><span>% Tenera</span><strong id="tdPctTenera">0.00%</strong></div>
+              <div class="metric"><span>% Dura</span><strong id="tdPctDura">0.00%</strong></div>
+              <div class="metric"><span>Dominan</span><strong id="tdDominant">-</strong></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="page-rekapGrading" class="page">
+        <div class="card">
+          <div class="card-head">
+            <div><h3>Rekap Grading</h3><p>Data grading realtime.</p></div>
+          </div>
+          <div class="toolbar">
+            <input id="rekapGradingSearch" class="input" placeholder="Cari sopir, plat, supplier..." />
+            <input id="rekapGradingStart" class="input" type="date" />
+            <input id="rekapGradingEnd" class="input" type="date" />
+          </div>
+          <div class="table-wrap"><table><thead><tr><th>Tanggal</th><th>Jam</th><th>Sopir</th><th>Plat</th><th>Supplier</th><th>Total Janjang</th><th>% Masak</th><th>Potongan</th><th>Aksi</th></tr></thead><tbody id="rekapGradingTable"></tbody></table></div>
+        </div>
+      </section>
+
+      <section id="page-rekapTD" class="page">
+        <div class="card">
+          <div class="card-head">
+            <div><h3>Rekap Tenera Dura</h3><p>Data TD realtime.</p></div>
+          </div>
+          <div class="toolbar">
+            <input id="rekapTDSearch" class="input" placeholder="Cari sopir atau plat..." />
+            <input id="rekapTDStart" class="input" type="date" />
+            <input id="rekapTDEnd" class="input" type="date" />
+          </div>
+          <div class="table-wrap"><table><thead><tr><th>Tanggal</th><th>Jam</th><th>Sopir</th><th>Plat</th><th>Tenera</th><th>Dura</th><th>% Tenera</th><th>% Dura</th><th>Aksi</th></tr></thead><tbody id="rekapTDTable"></tbody></table></div>
+        </div>
+      </section>
+
+      <section id="page-sheetGrading" class="page staff-only-page">
+        <div class="card">
+          <div class="card-head"><div><h3>Spreadsheet Grading</h3><p>Edit manual langsung di tabel.</p></div></div>
+          <div class="toolbar"><input id="sheetGradingSearch" class="input" placeholder="Filter spreadsheet grading..." /></div>
+          <div class="table-wrap spreadsheet"><table id="sheetGradingTable" class="sheet-table"></table></div>
+        </div>
+      </section>
+
+      <section id="page-sheetTD" class="page staff-only-page">
+        <div class="card">
+          <div class="card-head"><div><h3>Spreadsheet Tenera Dura</h3><p>Edit manual langsung di tabel.</p></div></div>
+          <div class="toolbar"><input id="sheetTDSearch" class="input" placeholder="Filter spreadsheet TD..." /></div>
+          <div class="table-wrap spreadsheet"><table id="sheetTDTable" class="sheet-table"></table></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
